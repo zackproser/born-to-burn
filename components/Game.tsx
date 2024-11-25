@@ -16,6 +16,7 @@ const Game = () => {
         const initPhaser = async () => {
             const Phaser = await import('phaser');
             const { default: MainScene } = await import('@/game/scenes/MainScene');
+            const { default: TitleScene } = await import('@/game/scenes/TitleScene');
 
             const config = {
                 type: Phaser.AUTO,
@@ -28,7 +29,7 @@ const Game = () => {
                         debug: false
                     }
                 },
-                scene: MainScene,
+                scene: [TitleScene, MainScene],
                 parent: 'game-container'
             };
 

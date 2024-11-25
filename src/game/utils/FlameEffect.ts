@@ -16,12 +16,12 @@ export function createFlameEffect(
     config: FlameConfig = {}
 ): Phaser.GameObjects.Particles.ParticleEmitter {
     const defaultConfig = {
-        color: 0xffffff,
-        alpha: { start: 1, end: 0 },
-        scale: { start: 0.4, end: 0 },
+        color: [0xffa500, 0xff4500, 0xff8c00],
+        alpha: { start: 0.8, end: 0 },
+        scale: { start: 0.6, end: 0.1 },
         blendMode: 'ADD',
-        lifespan: 500,
-        quantity: 1
+        lifespan: 2000,
+        quantity: 2
     };
 
     const finalConfig = { ...defaultConfig, ...config };
@@ -32,10 +32,18 @@ export function createFlameEffect(
         scale: finalConfig.scale,
         blendMode: finalConfig.blendMode,
         lifespan: finalConfig.lifespan,
-        frequency: 50,
+        frequency: 30,
         quantity: finalConfig.quantity,
-        rotate: { min: -10, max: 10 },
-        speedY: { min: -60, max: -80 },
-        speedX: { min: -20, max: 20 }
+        rotate: { min: -15, max: 15 },
+        speedY: { min: -100, max: -150 },
+        speedX: { min: -20, max: 20 },
+        gravityY: -50,
+        tint: { min: 0xff0000, max: 0xffff00 },
+        emitZone: {
+            type: 'random',
+            source: new Phaser.Geom.Circle(0, 0, 10),
+            quantity: 1,
+            stepRate: 0
+        }
     });
 } 
