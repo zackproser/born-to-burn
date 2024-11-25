@@ -11,6 +11,9 @@ export default class TitleScene extends Phaser.Scene {
     }
 
     preload() {
+        // This path is correct - it points to public/assets/borntoburnbg.png
+        this.load.image('background', '/assets/borntoburnbg.png');
+
         // Create leaf texture using arc instead of ellipse
         const leafGraphics = this.add.graphics();
         leafGraphics.fillStyle(0xffffff);
@@ -33,8 +36,8 @@ export default class TitleScene extends Phaser.Scene {
     }
 
     create() {
-        // Create background
-        this.add.rectangle(400, 300, 800, 600, 0x000000);
+        // Replace the black rectangle with the background image
+        this.add.image(400, 300, 'background');
 
         // Create pedestal and candlestick group
         const decorGroup = this.add.container(400, 0);
