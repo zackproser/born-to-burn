@@ -1,131 +1,139 @@
 import * as Phaser from 'phaser';
+import { createWindEffect, createLeaf } from '../utils/WindEffect';
+import { createFlameEffect } from '../utils/FlameEffect';
 
 export default class TitleScene extends Phaser.Scene {
-    private titleText!: Phaser.GameObjects.Text;
-    private candleLight!: Phaser.GameObjects.Particles.ParticleEmitter;
-    private torches: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
-    private candleContainer!: Phaser.GameObjects.Container;
+    private windEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
+    private leafEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
 
     constructor() {
         super({ key: 'TitleScene' });
     }
 
     preload() {
-        // Create flame particle texture
+        // Create leaf texture using arc instead of ellipse
+        const leafGraphics = this.add.graphics();
+        leafGraphics.fillStyle(0xffffff);
+        leafGraphics.beginPath();
+        leafGraphics.moveTo(8, 0);
+        leafGraphics.arc(8, 8, 8, -Math.PI/2, Math.PI/2, false);
+        leafGraphics.lineTo(8, 0);
+        leafGraphics.closePath();
+        leafGraphics.fill();
+        leafGraphics.generateTexture('leaf', 16, 16);
+        leafGraphics.destroy();
+
+        // Create flame particle
         const graphics = this.add.graphics();
+        graphics.clear();
         graphics.fillStyle(0xffffff, 1);
         graphics.fillCircle(32, 32, 32);
         graphics.generateTexture('flame', 64, 64);
         graphics.destroy();
-
-        // Create gradient background texture
-        const gradientGraphics = this.add.graphics();
-        for (let y = 0; y < 600; y++) {
-            const color = Phaser.Display.Color.Interpolate.ColorWithColor(
-                Phaser.Display.Color.ValueToColor(0x1a0f1f),
-                Phaser.Display.Color.ValueToColor(0x0a0510),
-                600,
-                y
-            );
-            gradientGraphics.lineStyle(1, color.color, 1);
-            gradientGraphics.lineBetween(0, y, 800, y);
-        }
-        gradientGraphics.generateTexture('gradient', 800, 600);
-        gradientGraphics.destroy();
     }
 
     create() {
-        // Add gradient background
-        this.add.image(400, 300, 'gradient');
+        // Create background
+        this.add.rectangle(400, 300, 800, 600, 0x000000);
 
-        // Add stone platform with better visuals
-        const platform = this.add.graphics();
-        platform.fillStyle(0x2a2a2a);
-        platform.fillRect(300, 390, 200, 40);
+        // Create pedestal and candlestick group
+        const decorGroup = this.add.container(400, 0);
         
-        // Add platform details
-        platform.lineStyle(2, 0x3a3a3a);
-        platform.strokeRect(300, 390, 200, 40);
-
-        // Add central candle and add it to the scene
-        const candleBase = this.add.rectangle(400, 385, 20, 40, 0xd4d4d4)
-            .setOrigin(0.5)
-            .setDepth(1);
+        decorGroup.add(this.add.rectangle(0, 500, 200, 40, 0x666666)); // pedestal
+        decorGroup.add(this.add.rectangle(0, 450, 20, 40, 0xf4f4f4)); // candle body
+        decorGroup.add(this.add.rectangle(0, 428, 4, 8, 0x333333)); // wick
         
-        const candleWick = this.add.rectangle(400, 363, 4, 8, 0x333333)
-            .setOrigin(0.5)
-            .setDepth(1);
-
-        // Create container for candle parts to move them together
-        this.candleContainer = this.add.container(0, 0, [candleBase, candleWick]);
-
-        // Enhanced flame effect for the central candle
-        this.candleLight = this.add.particles(400, 360, 'flame', {
-            color: [ 0xffffff, 0xffd700, 0xff8c00, 0xff4500 ],
-            colorEase: 'quad.out',
-            lifespan: 800,
-            angle: { min: -10, max: 10 },
-            scale: { start: 0.3, end: 0 },
-            speed: { min: 50, max: 100 },
-            quantity: 2,
-            frequency: 30,
-            blendMode: 'ADD',
-            alpha: { start: 0.8, end: 0 },
-            emitting: true
+        // Create strongly wind-blown flame effect
+        createFlameEffect(this, 400, 424, {
+            color: [
+                0xffffff, // White
+                0x00bfff, // Blue
+                0x1e90ff, // Deeper blue
+                0xff4500, // Red-orange
+                0xff8c00, // Dark orange
+                0xffd700  // Gold/yellow
+            ],
+            scale: { start: 0.35, end: 0 },
+            lifespan: 600,
+            quantity: 3,
+            particleConfig: {
+                speedX: { min: 250, max: 350 },    // Increased horizontal speed
+                speedY: { min: -40, max: -60 },    // Reduced vertical movement
+                gravityY: -50,                     // Reduced upward drift
+                rotate: { min: -5, max: 5 },       // Reduced rotation for more horizontal look
+                emitZone: {
+                    type: 'random',
+                    source: new Phaser.Geom.Circle(0, 0, 3), // Smaller emission zone
+                    quantity: 1
+                }
+            }
         });
 
-        // Add title text with enhanced glow effect
-        this.titleText = this.add.text(400, 200, 'BORN TO BURN', {
+        // Add title text with shadow for better visibility
+        this.add.text(400, 200, 'Born to Burn', {
             fontSize: '64px',
-            fontFamily: 'Arial Black',
-            color: '#ff4500',
+            fontFamily: 'Arial',
+            color: '#ffffff',
+            shadow: {
+                color: '#000000',
+                fill: true,
+                offsetX: 2,
+                offsetY: 2,
+                blur: 8
+            }
         }).setOrigin(0.5);
 
-        // Enhanced text glow
-        this.titleText.setStroke('#ff8c00', 16);
-        this.titleText.setShadow(0, 0, '#ff0000', 8, true, true);
-
-        // Add pulsing glow effect to title
-        this.tweens.add({
-            targets: this.titleText,
-            alpha: 0.8,
-            duration: 1500,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
-
-        // Add "Press SPACE to start" text
-        const startText = this.add.text(400, 500, 'Press SPACE to start', {
+        // Add start text
+        const startText = this.add.text(400, 300, 'Press SPACE to start', {
             fontSize: '24px',
             fontFamily: 'Arial',
             color: '#ffffff',
+            shadow: {
+                color: '#000000',
+                fill: true,
+                offsetX: 1,
+                offsetY: 1,
+                blur: 4
+            }
         }).setOrigin(0.5);
 
-        // Smoother blinking effect
-        this.tweens.add({
-            targets: startText,
-            alpha: 0.2,
-            duration: 1200,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
+        // Create multiple wind streams at different heights with increased visibility
+        const windConfigs = [
+            { y: 150, speed: 0.7, scale: 1.4, alpha: 0.4, tint: 0x87CEEB }, // Light blue, slow
+            { y: 250, speed: 1.2, scale: 1.2, alpha: 0.5, tint: 0x4169E1 }, // Royal blue, medium
+            { y: 350, speed: 0.9, scale: 1.3, alpha: 0.45, tint: 0x1E90FF }, // Dodger blue, normal
+            { y: 450, speed: 1.5, scale: 1.1, alpha: 0.5, tint: 0x0000CD }  // Medium blue, fast
+        ];
+
+        // Create wind effects
+        windConfigs.forEach(config => {
+            this.windEmitters.push(createWindEffect(this, config));
         });
 
-        // Add space key handler
+        // Create leaf spawners at different positions
+        const leafPositions = [
+            { x: -50, y: 100 },
+            { x: -50, y: 300 },
+            { x: -50, y: 500 }
+        ];
+
+        leafPositions.forEach(pos => {
+            this.leafEmitters.push(createLeaf(this, pos.x, pos.y));
+        });
+
+        // Add hover effect to start text
+        this.tweens.add({
+            targets: startText,
+            alpha: 0.5,
+            duration: 1000,
+            ease: 'Power1',
+            yoyo: true,
+            repeat: -1
+        });
+
+        // Handle space bar to start game
         this.input.keyboard?.addKey('SPACE').on('down', () => {
             this.scene.start('MainScene');
         });
-    }
-
-    update() {
-        if (this.candleLight) {
-            const time = this.time.now / 1000;
-            const offsetX = Math.sin(time * 2) * 2;
-            
-            // Update both the flame and candle position
-            this.candleLight.setPosition(400 + offsetX, 360);
-            this.candleContainer.setPosition(offsetX, 0);
-        }
     }
 } 

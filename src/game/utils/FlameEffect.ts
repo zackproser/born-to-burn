@@ -1,19 +1,30 @@
 import * as Phaser from 'phaser';
 
 interface FlameConfig {
-    color?: number | number[];
+    color: number[];
     alpha?: { start: number; end: number };
-    scale?: { start: number; end: number };
+    scale: { start: number; end: number };
     blendMode?: string;
-    lifespan?: number;
-    quantity?: number;
+    lifespan: number;
+    quantity: number;
+    particleConfig?: {
+        speedX: { min: number; max: number };
+        speedY: { min: number; max: number };
+        gravityY: number;
+        rotate: { min: number; max: number };
+        emitZone: {
+            type: string;
+            source: Phaser.Geom.Circle;
+            quantity: number;
+        };
+    };
 }
 
 export function createFlameEffect(
     scene: Phaser.Scene, 
     x: number, 
     y: number, 
-    config: FlameConfig = {}
+    config: FlameConfig
 ): Phaser.GameObjects.Particles.ParticleEmitter {
     const defaultConfig = {
         color: [0xffa500, 0xff4500, 0xff8c00],
@@ -21,10 +32,29 @@ export function createFlameEffect(
         scale: { start: 0.6, end: 0.1 },
         blendMode: 'ADD',
         lifespan: 2000,
-        quantity: 2
+        quantity: 2,
+        particleConfig: {
+            speedX: { min: -20, max: 20 },
+            speedY: { min: -100, max: -150 },
+            gravityY: -50,
+            rotate: { min: -15, max: 15 },
+            emitZone: {
+                type: 'random',
+                source: new Phaser.Geom.Circle(0, 0, 10),
+                quantity: 1,
+                stepRate: 0
+            }
+        }
     };
 
-    const finalConfig = { ...defaultConfig, ...config };
+    const finalConfig = {
+        ...defaultConfig,
+        ...config,
+        particleConfig: {
+            ...defaultConfig.particleConfig,
+            ...config.particleConfig
+        }
+    };
 
     return scene.add.particles(x, y, 'flame', {
         color: Array.isArray(finalConfig.color) ? finalConfig.color : [finalConfig.color],
@@ -34,16 +64,6 @@ export function createFlameEffect(
         lifespan: finalConfig.lifespan,
         frequency: 30,
         quantity: finalConfig.quantity,
-        rotate: { min: -15, max: 15 },
-        speedY: { min: -100, max: -150 },
-        speedX: { min: -20, max: 20 },
-        gravityY: -50,
-        tint: { min: 0xff0000, max: 0xffff00 },
-        emitZone: {
-            type: 'random',
-            source: new Phaser.Geom.Circle(0, 0, 10),
-            quantity: 1,
-            stepRate: 0
-        }
+        ...finalConfig.particleConfig
     });
 } 
