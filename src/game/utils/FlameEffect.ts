@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 
 export const createFlameEffect = (scene: Phaser.Scene, x: number, y: number) => {
     return scene.add.particles(x, y, 'flame', {
