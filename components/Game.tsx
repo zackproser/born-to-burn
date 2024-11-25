@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import type Phaser from 'phaser';
 
 const Game = () => {
-    const gameRef = useRef<any>(null);
+    const gameRef = useRef<Phaser.Game | null>(null);
 
     useEffect(() => {
         // Make sure we're in the browser
@@ -23,7 +24,7 @@ const Game = () => {
                 physics: {
                     default: 'arcade',
                     arcade: {
-                        gravity: { y: 300 },
+                        gravity: { x: 0, y: 300 },
                         debug: false
                     }
                 },

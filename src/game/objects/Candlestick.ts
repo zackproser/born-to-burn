@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { createFlameEffect } from '../utils/FlameEffect';
 
 export default class Candlestick extends Phaser.GameObjects.Container {
-    private body: Phaser.Physics.Arcade.Body;
+    public body!: Phaser.Physics.Arcade.Body;
     private candleBody: Phaser.GameObjects.Rectangle;
     private flame: Phaser.GameObjects.Particles.ParticleEmitter;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -24,11 +24,16 @@ export default class Candlestick extends Phaser.GameObjects.Container {
 
         // Enable physics
         scene.physics.add.existing(this);
-        this.body = this.body as Phaser.Physics.Arcade.Body;
         this.body.setSize(20, 40);
 
-        // Enable keyboard input
-        scene.input.keyboard?.addCapture(Phaser.Input.Keyboard.KeyCodes);
+        // Enable keyboard input for cursor keys
+        scene.input.keyboard?.addCapture([
+            Phaser.Input.Keyboard.KeyCodes.UP,
+            Phaser.Input.Keyboard.KeyCodes.DOWN,
+            Phaser.Input.Keyboard.KeyCodes.LEFT,
+            Phaser.Input.Keyboard.KeyCodes.RIGHT
+        ]);
+        
         // Setup input
         this.cursors = scene.input.keyboard!.createCursorKeys();
 
