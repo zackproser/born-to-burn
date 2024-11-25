@@ -33,7 +33,6 @@ export default class Candlestick extends Phaser.GameObjects.Container {
             blendMode: 'ADD',
             lifespan: 600,
             quantity: 2,
-            speedX: { min: -10, max: 10 } // Reduced horizontal spread (default was -20 to 20)
         });
         this.add(this.flame);
 

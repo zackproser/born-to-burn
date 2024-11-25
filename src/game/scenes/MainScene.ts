@@ -73,10 +73,10 @@ export default class MainScene extends Phaser.Scene {
                 (player, beam) => {
                     // Custom check to ensure meaningful overlap
                     const distance = Phaser.Math.Distance.Between(
-                        player.x,
-                        player.y,
-                        beam.x,
-                        beam.y
+                        (player as Phaser.GameObjects.Sprite).x,
+                        (player as Phaser.GameObjects.Sprite).y,
+                        (beam as Phaser.GameObjects.Sprite).x,
+                        (beam as Phaser.GameObjects.Sprite).y
                     );
                     return distance < 60; // Adjust this value as needed
                 }

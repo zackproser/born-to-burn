@@ -27,7 +27,7 @@ export function createFlameEffect(
     const finalConfig = { ...defaultConfig, ...config };
 
     return scene.add.particles(x, y, 'flame', {
-        color: finalConfig.color,
+        color: Array.isArray(finalConfig.color) ? finalConfig.color : [finalConfig.color],
         alpha: finalConfig.alpha,
         scale: finalConfig.scale,
         blendMode: finalConfig.blendMode,
